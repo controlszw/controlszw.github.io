@@ -237,6 +237,14 @@ function ExpenseTracker() {
             </h3>
           </div>
 
+          {/* Add Button */}
+          <button
+            onClick={addExpense}
+            className="w-full mb-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
+          >
+            ➕ Adicionar
+          </button>
+
           {/* Add Expense Form */}
           <div className="flex flex-col gap-2 mb-4 sm:mb-6">
             <input
@@ -253,22 +261,14 @@ function ExpenseTracker() {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             />
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Parcelas"
-                value={installments}
-                min="1"
-                onChange={(e) => setInstallments(parseInt(e.target.value))}
-                className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-              />
-              <button
-                onClick={addExpense}
-                className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
-              >
-                ➕ Adicionar
-              </button>
-            </div>
+            <input
+              type="number"
+              placeholder="Parcelas"
+              value={installments}
+              min="1"
+              onChange={(e) => setInstallments(parseInt(e.target.value))}
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            />
           </div>
 
           {/* Expenses List */}

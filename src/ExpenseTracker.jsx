@@ -42,10 +42,9 @@ function ExpenseTracker() {
 
   const fetchExpenses = async (uid, month, year) => {
     try {
-      const expensesRef = collection(db, "expenses");
+      const userExpensesRef = collection(db, "users", uid, "expenses");
       const q = query(
-        expensesRef,
-        where("uid", "==", uid),
+        userExpensesRef,
         where("month", "==", month),
         where("year", "==", year)
       );
@@ -73,7 +72,6 @@ function ExpenseTracker() {
         const installmentYear =
           currentYear + Math.floor((currentMonth + i) / 12);
         const newExpense = {
-          uid: user.uid,
           value: parsedValue / installments,
           description: `${description} - Parcela ${i + 1}/${installments}`,
           month: installmentMonth,
@@ -85,7 +83,7 @@ function ExpenseTracker() {
       }
 
       const promises = expensesToAdd.map((expense) =>
-        addDoc(collection(db, "expenses"), expense)
+        addDoc(collection(db, "users", user.uid, "expenses"), expense)
       );
       const addedDocs = await Promise.all(promises);
 
@@ -110,7 +108,7 @@ function ExpenseTracker() {
 
   const updateExpense = async (id, newValue) => {
     try {
-      const docRef = doc(db, "expenses", id);
+      const docRef = doc(db, "users", user.uid, "expenses", id);
       await updateDoc(docRef, { value: parseFloat(newValue) });
 
       setExpenses((prevExpenses) =>
@@ -132,11 +130,10 @@ function ExpenseTracker() {
       const expenseToDelete = expenses.find((expense) => expense.id === id);
       if (!expenseToDelete) return;
 
-      const expensesRef = collection(db, "expenses");
+      const expensesRef = collection(db, "users", user.uid, "expenses");
       const q = query(
         expensesRef,
-        where("groupId", "==", expenseToDelete.groupId),
-        where("uid", "==", user.uid) // Adicione esta linha
+        where("groupId", "==", expenseToDelete.groupId)
       );
       const querySnapshot = await getDocs(q);
 
@@ -183,6 +180,9 @@ function ExpenseTracker() {
     (sum, expense) => sum + expense.value,
     0
   );
+
+  // O restante do JSX permanece igual...
+  // (Manter a mesma interface do código anterior)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4">

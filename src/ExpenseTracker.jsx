@@ -185,10 +185,10 @@ function ExpenseTracker() {
   );
 
   return (
-    <div className="h-screen w-screen bg-gray-900 text-gray-100 flex flex-col overflow-hidden">
-      <div className="max-w-4xl mx-auto flex-1 w-full px-2 sm:px-4">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center py-3 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
           <h1 className="text-xl sm:text-2xl font-bold text-emerald-400 text-center">
             💰 Controle de Gastos
           </h1>
@@ -200,9 +200,9 @@ function ExpenseTracker() {
           </button>
         </div>
 
-        {/* Área principal */}
-        <div className="bg-gray-800 rounded-xl p-3 sm:p-4 h-full flex flex-col touch-pan-y">
-          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3">
+        {/* Month Navigation */}
+        <div className="bg-gray-800 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl">
+          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-center">
               📅{" "}
               {new Date(currentYear, currentMonth)
@@ -229,14 +229,22 @@ function ExpenseTracker() {
           </div>
 
           {/* Total */}
-          <div className="bg-gray-700 p-2 rounded-lg mb-3">
-            <h3 className="text-lg font-bold text-center text-emerald-400">
+          <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-center text-emerald-400">
               Total: R$ {totalExpenses.toFixed(2)}
             </h3>
           </div>
 
-          {/* Formulário */}
-          <div className="flex flex-col gap-2 mb-4">
+          {/* Add Button */}
+          <button
+            onClick={addExpense}
+            className="w-full mb-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
+          >
+            ➕ Adicionar
+          </button>
+
+          {/* Add Expense Form */}
+          <div className="flex flex-col gap-2 mb-4 sm:mb-6">
             <input
               type="number"
               placeholder="Valor"
@@ -261,18 +269,18 @@ function ExpenseTracker() {
             />
           </div>
 
-          {/* Lista de Gastos com Scroll */}
-          <div className="flex-1 overflow-y-auto pb-16 sm:pb-2 scrollbar-hide">
+          {/* Expenses List */}
+          <div className="space-y-2">
             {expenses.map((expense) => (
               <div
                 key={expense.id}
-                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200 mb-2"
+                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
               >
-                <span className="text-sm text-gray-300 break-words flex-1">
+                <span className="text-sm text-gray-300 break-words max-w-[65vw]">
                   {expense.description}
                 </span>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2">
                   {editId === expense.id ? (
                     <input
                       type="number"
@@ -281,7 +289,7 @@ function ExpenseTracker() {
                       className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                     />
                   ) : (
-                    <span className="text-sm font-mono text-emerald-400">
+                    <span className="text-sm sm:text-base font-mono text-emerald-400">
                       R$ {expense.value.toFixed(2)}
                     </span>
                   )}

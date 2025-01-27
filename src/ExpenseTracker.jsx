@@ -277,19 +277,6 @@ function ExpenseTracker() {
               <div className="space-y-3">
                 {showAddForm ? (
                   <>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={addExpense}
-                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
-                      >
-                        ➕ Adicionar
-                      </button>
-                      <button
-                        onClick={() => setShowAddForm(false)}
-                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
-                      >
-                        Cancelar
-                      </button>
                     <input
                       type="number"
                       placeholder="Valor"
@@ -312,7 +299,19 @@ function ExpenseTracker() {
                       onChange={(e) => setInstallments(parseInt(e.target.value))}
                       className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
-                  
+                    <div className="flex gap-2">
+                      <button
+                        onClick={addExpense}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+                      >
+                        ➕ Adicionar
+                      </button>
+                      <button
+                        onClick={() => setShowAddForm(false)}
+                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                      >
+                        Cancelar
+                      </button>
                     </div>
                   </>
                 ) : (

@@ -21,8 +21,10 @@ function ExpenseTracker() {
   const [installments, setInstallments] = useState(1);
   const [editId, setEditId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentSort, setCurrentSort] = useState("value");
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -49,10 +51,14 @@ function ExpenseTracker() {
         where("year", "==", year)
       );
       const querySnapshot = await getDocs(q);
-      const fetchedExpenses = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const fetchedExpenses = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp.toDate(),
+        };
+      });
       setExpenses(fetchedExpenses);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -106,20 +112,28 @@ function ExpenseTracker() {
     }
   };
 
-  const updateExpense = async (id, newValue) => {
+  const updateExpense = async (id, newValue, newDescription) => {
     try {
       const docRef = doc(db, "users", user.uid, "expenses", id);
-      await updateDoc(docRef, { value: parseFloat(newValue) });
+      await updateDoc(docRef, {
+        value: parseFloat(newValue),
+        description: newDescription,
+      });
 
       setExpenses((prevExpenses) =>
         prevExpenses.map((expense) =>
           expense.id === id
-            ? { ...expense, value: parseFloat(newValue) }
+            ? {
+                ...expense,
+                value: parseFloat(newValue),
+                description: newDescription,
+              }
             : expense
         )
       );
       setEditId(null);
       setEditValue("");
+      setEditDescription("");
     } catch (err) {
       console.error("Error updating expense:", err);
     }
@@ -181,147 +195,196 @@ function ExpenseTracker() {
     0
   );
 
-  // O restante do JSX permanece igual...
-  // (Manter a mesma interface do código anterior)
+  const sortedExpenses = [...expenses].sort((a, b) => {
+    if (currentSort === "value") {
+      return b.value - a.value;
+    } else {
+      return b.timestamp - a.timestamp;
+    }
+  });
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-emerald-400 text-center">
-            💰 Controle de Gastos
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="w-full sm:w-auto px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200 text-sm"
-          >
-            🚪 Sair
-          </button>
+    <div className="h-dvh bg-gray-900 text-gray-100 flex flex-col overflow-hidden">
+      <div className="max-w-4xl mx-auto w-full h-full flex flex-col min-h-0">
+        {/* Header Fixo */}
+        <div className="pt-4 px-4 flex-shrink-0">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-bold text-emerald-400">
+              💰 Controle de Gastos
+            </h1>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
+            >
+              🚪 Sair
+            </button>
+          </div>
         </div>
 
-        {/* Month Navigation */}
-        <div className="bg-gray-800 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl">
-          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-center">
-              📅{" "}
-              {new Date(currentYear, currentMonth)
-                .toLocaleDateString("pt-BR", {
-                  month: "long",
-                  year: "numeric",
-                })
-                .replace(/de /g, "")}
-            </h2>
-            <div className="flex gap-2 w-full sm:w-auto">
+        {/* Área Fixa Superior */}
+        <div className="px-4 flex-shrink-0">
+          <div className="bg-gray-800 rounded-xl p-4 mb-4 shadow-xl">
+            {/* Controles do Mês */}
+            <div className="flex flex-col gap-3 mb-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">
+                  📅{" "}
+                  {new Date(currentYear, currentMonth)
+                    .toLocaleDateString("pt-BR", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                    .replace(/de /g, "")}
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={previousMonth}
+                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={nextMonth}
+                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
+              {/* Total e Filtro */}
+              <div className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                <h3 className="font-bold text-emerald-400">
+                  Total: R$ {totalExpenses.toFixed(2)}
+                </h3>
+                <select
+                  value={currentSort}
+                  onChange={(e) => setCurrentSort(e.target.value)}
+                  className="bg-gray-800 px-2 py-1 rounded-lg text-sm"
+                >
+                  <option value="value">Maior valor</option>
+                  <option value="date">Mais recente</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Formulário de Adição */}
+            <div className="space-y-3">
+              <input
+                type="number"
+                placeholder="Valor"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <input
+                type="text"
+                placeholder="Descrição"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <input
+                type="number"
+                placeholder="Parcelas"
+                value={installments}
+                min="1"
+                onChange={(e) => setInstallments(parseInt(e.target.value))}
+                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
               <button
-                onClick={previousMonth}
-                className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                onClick={addExpense}
+                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200"
               >
-                ← Anterior
-              </button>
-              <button
-                onClick={nextMonth}
-                className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
-              >
-                Próximo →
+                ➕ Adicionar Gasto
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Total */}
-          <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold text-center text-emerald-400">
-              Total: R$ {totalExpenses.toFixed(2)}
-            </h3>
-          </div>
-
-          {/* Add Button */}
-          <button
-            onClick={addExpense}
-            className="w-full mb-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
-          >
-            ➕ Adicionar
-          </button>
-
-          {/* Add Expense Form */}
-          <div className="flex flex-col gap-2 mb-4 sm:mb-6">
-            <input
-              type="number"
-              placeholder="Valor"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Descrição"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-            />
-            <input
-              type="number"
-              placeholder="Parcelas"
-              value={installments}
-              min="1"
-              onChange={(e) => setInstallments(parseInt(e.target.value))}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-            />
-          </div>
-
-          {/* Expenses List */}
-          <div className="space-y-2">
-            {expenses.map((expense) => (
+        {/* Área Rolável de Gastos */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4 [overflow-scrolling:touch]">
+          <div className="space-y-3">
+            {sortedExpenses.map((expense) => (
               <div
                 key={expense.id}
-                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
+                className="bg-gray-800 p-4 rounded-lg shadow-md hover:bg-gray-750 transition-colors duration-200"
               >
-                <span className="text-sm text-gray-300 break-words max-w-[65vw]">
-                  {expense.description}
-                </span>
-
-                <div className="flex items-center justify-between gap-2">
-                  {editId === expense.id ? (
+                {editId === expense.id ? (
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="text"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
                     <input
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                      className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
-                  ) : (
-                    <span className="text-sm sm:text-base font-mono text-emerald-400">
-                      R$ {expense.value.toFixed(2)}
-                    </span>
-                  )}
-                  <div className="flex gap-1">
-                    {editId === expense.id ? (
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => updateExpense(expense.id, editValue)}
-                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
+                        onClick={() =>
+                          updateExpense(expense.id, editValue, editDescription)
+                        }
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
                       >
-                        💾
+                        Salvar
                       </button>
-                    ) : (
-                      <>
+                      <button
+                        onClick={() => {
+                          setEditId(null);
+                          setEditValue("");
+                          setEditDescription("");
+                        }}
+                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <p className="text-gray-200 font-medium break-words">
+                        {expense.description}
+                      </p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {expense.timestamp.toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-emerald-400 font-mono">
+                        R$ {expense.value.toFixed(2)}
+                      </span>
+                      <div className="flex gap-2">
                         <button
                           onClick={() => {
                             setEditId(expense.id);
                             setEditValue(expense.value.toString());
+                            setEditDescription(expense.description);
                           }}
-                          className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
+                          className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => removeExpense(expense.id)}
-                          className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
+                          className="p-2 bg-red-600 hover:bg-red-700 rounded-lg"
                         >
                           🗑️
                         </button>
-                      </>
-                    )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

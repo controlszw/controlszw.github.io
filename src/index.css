@@ -15,3 +15,18 @@ body {
   height: 100%;
   width: 100%;
 }
+
+/* Garante comportamento de rolagem suave no iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Corrige comportamento de altura no mobile */
+@layer utilities {
+  .h-screen {
+    height: 100vh;
+    height: 100dvh;
+  }
+}

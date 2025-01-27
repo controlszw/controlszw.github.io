@@ -21,6 +21,7 @@ function ExpenseTracker() {
   const [installments, setInstallments] = useState(1);
   const [editId, setEditId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentSort, setCurrentSort] = useState("value");
@@ -110,20 +111,28 @@ function ExpenseTracker() {
     }
   };
 
-  const updateExpense = async (id, newValue) => {
+  const updateExpense = async (id, newValue, newDescription) => {
     try {
       const docRef = doc(db, "users", user.uid, "expenses", id);
-      await updateDoc(docRef, { value: parseFloat(newValue) });
+      await updateDoc(docRef, { 
+        value: parseFloat(newValue),
+        description: newDescription 
+      });
 
       setExpenses((prevExpenses) =>
         prevExpenses.map((expense) =>
           expense.id === id
-            ? { ...expense, value: parseFloat(newValue) }
+            ? { 
+                ...expense, 
+                value: parseFloat(newValue),
+                description: newDescription 
+              }
             : expense
         )
       );
       setEditId(null);
       setEditValue("");
+      setEditDescription("");
     } catch (err) {
       console.error("Error updating expense:", err);
     }
@@ -257,14 +266,14 @@ function ExpenseTracker() {
               placeholder="Valor"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
             />
             <input
               type="text"
               placeholder="Descrição"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
             />
             <input
               type="number"
@@ -272,78 +281,99 @@ function ExpenseTracker() {
               value={installments}
               min="1"
               onChange={(e) => setInstallments(parseInt(e.target.value))}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
             />
             <button
               onClick={addExpense}
-              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
+              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-base"
             >
               ➕ Adicionar Gasto
             </button>
           </div>
 
           {/* Expenses List */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {sortedExpenses.map((expense) => (
               <div
                 key={expense.id}
-                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
+                className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between bg-gray-800 p-4 rounded-lg hover:bg-gray-750 transition-colors duration-200"
               >
-                <div className="flex-1">
-                  <span className="text-sm text-gray-300 break-words block">
-                    {expense.description}
-                  </span>
-                  <span className="text-xs text-gray-500 block mt-1">
-                    {expense.timestamp.toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  {editId === expense.id ? (
+                {editId === expense.id ? (
+                  <div className="flex-1 flex flex-col gap-3">
+                    <input
+                      type="text"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                    />
                     <input
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
                     />
-                  ) : (
-                    <span className="text-sm sm:text-base font-mono text-emerald-400">
-                      R$ {expense.value.toFixed(2)}
+                  </div>
+                ) : (
+                  <div className="flex-1">
+                    <span className="text-base text-gray-200 break-words block font-medium">
+                      {expense.description}
                     </span>
-                  )}
-                  <div className="flex gap-1">
-                    {editId === expense.id ? (
+                    <span className="text-sm text-gray-400 block mt-1">
+                      {expense.timestamp.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between gap-3 mt-2 sm:mt-0">
+                  {editId === expense.id ? (
+                    <div className="flex flex-col gap-2 w-full sm:w-auto">
                       <button
-                        onClick={() => updateExpense(expense.id, editValue)}
-                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
+                        onClick={() => updateExpense(expense.id, editValue, editDescription)}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200 text-base"
                       >
-                        💾
+                        Salvar
                       </button>
-                    ) : (
-                      <>
+                      <button
+                        onClick={() => {
+                          setEditId(null);
+                          setEditValue("");
+                          setEditDescription("");
+                        }}
+                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors duration-200 text-base"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-base sm:text-lg font-mono text-emerald-400 min-w-[100px] text-right">
+                        R$ {expense.value.toFixed(2)}
+                      </span>
+                      <div className="flex gap-2">
                         <button
                           onClick={() => {
                             setEditId(expense.id);
                             setEditValue(expense.value.toString());
+                            setEditDescription(expense.description);
                           }}
-                          className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
+                          className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors duration-200 text-base"
                         >
-                          ✏️
+                          Editar
                         </button>
                         <button
                           onClick={() => removeExpense(expense.id)}
-                          className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200 text-base"
                         >
-                          🗑️
+                          Excluir
                         </button>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

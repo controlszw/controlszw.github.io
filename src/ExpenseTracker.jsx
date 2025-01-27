@@ -23,7 +23,7 @@ function ExpenseTracker() {
   const [editValue, setEditValue] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [currentSort, setCurrentSort] = useState("value"); // 'value' ou 'date'
+  const [currentSort, setCurrentSort] = useState("value");
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -55,7 +55,7 @@ function ExpenseTracker() {
         return {
           id: doc.id,
           ...data,
-          timestamp: data.timestamp.toDate(), // Converter Timestamp para Date
+          timestamp: data.timestamp.toDate(),
         };
       });
       setExpenses(fetchedExpenses);
@@ -74,8 +74,7 @@ function ExpenseTracker() {
 
       for (let i = 0; i < installments; i++) {
         const installmentMonth = (currentMonth + i) % 12;
-        const installmentYear =
-          currentYear + Math.floor((currentMonth + i) / 12);
+        const installmentYear = currentYear + Math.floor((currentMonth + i) / 12);
         const newExpense = {
           value: parsedValue / installments,
           description: `${description} - Parcela ${i + 1}/${installments}`,
@@ -142,9 +141,7 @@ function ExpenseTracker() {
       );
       const querySnapshot = await getDocs(q);
 
-      const deletePromises = querySnapshot.docs.map((doc) =>
-        deleteDoc(doc.ref)
-      );
+      const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
 
       setExpenses((prevExpenses) =>
@@ -186,7 +183,6 @@ function ExpenseTracker() {
     0
   );
 
-  // Ordenar despesas
   const sortedExpenses = [...expenses].sort((a, b) => {
     if (currentSort === "value") {
       return b.value - a.value;
@@ -254,14 +250,6 @@ function ExpenseTracker() {
             </select>
           </div>
 
-          {/* Add Button */}
-          <button
-            onClick={addExpense}
-            className="w-full mb-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
-          >
-            ➕ Adicionar
-          </button>
-
           {/* Add Expense Form */}
           <div className="flex flex-col gap-2 mb-4 sm:mb-6">
             <input
@@ -286,75 +274,79 @@ function ExpenseTracker() {
               onChange={(e) => setInstallments(parseInt(e.target.value))}
               className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             />
+            <button
+              onClick={addExpense}
+              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-sm"
+            >
+              ➕ Adicionar Gasto
+            </button>
           </div>
 
           {/* Expenses List */}
-          <div className="max-h-[60vh] overflow-y-auto">
-            <div className="space-y-2">
-              {sortedExpenses.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
-                >
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-300 break-words block">
-                      {expense.description}
-                    </span>
-                    <span className="text-xs text-gray-500 block mt-1">
-                      {expense.timestamp.toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
+          <div className="space-y-2">
+            {sortedExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
+              >
+                <div className="flex-1">
+                  <span className="text-sm text-gray-300 break-words block">
+                    {expense.description}
+                  </span>
+                  <span className="text-xs text-gray-500 block mt-1">
+                    {expense.timestamp.toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
 
-                  <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  {editId === expense.id ? (
+                    <input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  ) : (
+                    <span className="text-sm sm:text-base font-mono text-emerald-400">
+                      R$ {expense.value.toFixed(2)}
+                    </span>
+                  )}
+                  <div className="flex gap-1">
                     {editId === expense.id ? (
-                      <input
-                        type="number"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                      />
+                      <button
+                        onClick={() => updateExpense(expense.id, editValue)}
+                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
+                      >
+                        💾
+                      </button>
                     ) : (
-                      <span className="text-sm sm:text-base font-mono text-emerald-400">
-                        R$ {expense.value.toFixed(2)}
-                      </span>
-                    )}
-                    <div className="flex gap-1">
-                      {editId === expense.id ? (
+                      <>
                         <button
-                          onClick={() => updateExpense(expense.id, editValue)}
-                          className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
+                          onClick={() => {
+                            setEditId(expense.id);
+                            setEditValue(expense.value.toString());
+                          }}
+                          className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
                         >
-                          💾
+                          ✏️
                         </button>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditId(expense.id);
-                              setEditValue(expense.value.toString());
-                            }}
-                            className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => removeExpense(expense.id)}
-                            className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
-                          >
-                            🗑️
-                          </button>
-                        </>
-                      )}
-                    </div>
+                        <button
+                          onClick={() => removeExpense(expense.id)}
+                          className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
+                        >
+                          🗑️
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

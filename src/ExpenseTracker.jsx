@@ -26,6 +26,7 @@ function ExpenseTracker() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentSort, setCurrentSort] = useState("value");
   const [showSummary, setShowSummary] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -107,6 +108,7 @@ function ExpenseTracker() {
       setValue("");
       setDescription("");
       setInstallments(1);
+      setShowAddForm(false);
     } catch (err) {
       console.error("Error adding expense:", err);
     }
@@ -270,37 +272,56 @@ function ExpenseTracker() {
               )}
             </div>
 
-            {/* Formulário de Adição (oculto no resumo) */}
+            {/* Formulário de Adição */}
             {!showSummary && (
               <div className="space-y-3">
-                <input
-                  type="number"
-                  placeholder="Valor"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Descrição"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <input
-                  type="number"
-                  placeholder="Parcelas"
-                  value={installments}
-                  min="1"
-                  onChange={(e) => setInstallments(parseInt(e.target.value))}
-                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <button
-                  onClick={addExpense}
-                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200"
-                >
-                  ➕ Adicionar Gasto
-                </button>
+                {showAddForm ? (
+                  <>
+                    <input
+                      type="number"
+                      placeholder="Valor"
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Descrição"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Parcelas"
+                      value={installments}
+                      min="1"
+                      onChange={(e) => setInstallments(parseInt(e.target.value))}
+                      className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={addExpense}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+                      >
+                        ➕ Adicionar
+                      </button>
+                      <button
+                        onClick={() => setShowAddForm(false)}
+                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowAddForm(true)}
+                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+                  >
+                    ➕ Novo Gasto
+                  </button>
+                )}
               </div>
             )}
           </div>

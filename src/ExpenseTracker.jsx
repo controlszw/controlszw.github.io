@@ -202,9 +202,9 @@ function ExpenseTracker() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4 flex flex-col">
-      <div className="max-w-4xl mx-auto flex-1 w-full overflow-auto">
+      <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 flex-shrink-0">
           <h1 className="text-xl sm:text-2xl font-bold text-emerald-400 text-center">
             💰 Controle de Gastos
           </h1>
@@ -216,83 +216,87 @@ function ExpenseTracker() {
           </button>
         </div>
 
-        {/* Month Navigation */}
-        <div className="bg-gray-800 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl">
-          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-center">
-              📅{" "}
-              {new Date(currentYear, currentMonth)
-                .toLocaleDateString("pt-BR", {
-                  month: "long",
-                  year: "numeric",
-                })
-                .replace(/de /g, "")}
-            </h2>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button
-                onClick={previousMonth}
-                className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+        {/* Month Navigation and Controls */}
+        <div className="flex-shrink-0">
+          <div className="bg-gray-800 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl">
+            <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-center">
+                📅{" "}
+                {new Date(currentYear, currentMonth)
+                  .toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })
+                  .replace(/de /g, "")}
+              </h2>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={previousMonth}
+                  className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                >
+                  ← Anterior
+                </button>
+                <button
+                  onClick={nextMonth}
+                  className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                >
+                  Próximo →
+                </button>
+              </div>
+            </div>
+
+            {/* Total e Filtro */}
+            <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4 flex justify-between items-center">
+              <h3 className="text-lg sm:text-xl font-bold text-emerald-400">
+                Total: R$ {totalExpenses.toFixed(2)}
+              </h3>
+              <select
+                value={currentSort}
+                onChange={(e) => setCurrentSort(e.target.value)}
+                className="bg-gray-800 text-gray-100 px-2 py-1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                ← Anterior
-              </button>
+                <option value="value">Maior valor</option>
+                <option value="date">Mais recente</option>
+              </select>
+            </div>
+
+            {/* Add Expense Form */}
+            <div className="flex flex-col gap-2 mb-4 sm:mb-6">
+              <input
+                type="number"
+                placeholder="Valor"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
+              <input
+                type="text"
+                placeholder="Descrição"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
+              <input
+                type="number"
+                placeholder="Parcelas"
+                value={installments}
+                min="1"
+                onChange={(e) => setInstallments(parseInt(e.target.value))}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
               <button
-                onClick={nextMonth}
-                className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                onClick={addExpense}
+                className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-base"
               >
-                Próximo →
+                ➕ Adicionar Gasto
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Total e Filtro */}
-          <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4 flex justify-between items-center">
-            <h3 className="text-lg sm:text-xl font-bold text-emerald-400">
-              Total: R$ {totalExpenses.toFixed(2)}
-            </h3>
-            <select
-              value={currentSort}
-              onChange={(e) => setCurrentSort(e.target.value)}
-              className="bg-gray-800 text-gray-100 px-2 py-1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              <option value="value">Maior valor</option>
-              <option value="date">Mais recente</option>
-            </select>
-          </div>
-
-          {/* Add Expense Form */}
-          <div className="flex flex-col gap-2 mb-4 sm:mb-6">
-            <input
-              type="number"
-              placeholder="Valor"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
-            />
-            <input
-              type="text"
-              placeholder="Descrição"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
-            />
-            <input
-              type="number"
-              placeholder="Parcelas"
-              value={installments}
-              min="1"
-              onChange={(e) => setInstallments(parseInt(e.target.value))}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
-            />
-            <button
-              onClick={addExpense}
-              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-base"
-            >
-              ➕ Adicionar Gasto
-            </button>
-          </div>
-
-          {/* Expenses List */}
-          <div className="space-y-3">
+        {/* Scrollable Expenses List */}
+        <div className="flex-1 overflow-auto pb-4">
+          <div className="bg-gray-800 rounded-xl p-3 sm:p-4 shadow-xl space-y-3">
             {sortedExpenses.map((expense) => (
               <div
                 key={expense.id}

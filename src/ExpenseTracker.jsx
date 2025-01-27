@@ -25,6 +25,7 @@ function ExpenseTracker() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentSort, setCurrentSort] = useState("value");
+  const [showSummary, setShowSummary] = useState(false);
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -207,12 +208,20 @@ function ExpenseTracker() {
         <div className="pt-4 px-4 flex-shrink-0">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-xl font-bold text-emerald-400">💰 Controle de Gastos</h1>
-            <button
-              onClick={handleLogout}
-              className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
-            >
-              🚪 Sair
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSummary(!showSummary)}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
+              >
+                {showSummary ? '📋 Lista' : '📊 Resumo'}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
+              >
+                🚪 Sair
+              </button>
+            </div>
           </div>
         </div>
 
@@ -293,90 +302,126 @@ function ExpenseTracker() {
           </div>
         </div>
 
-        {/* Área Rolável de Gastos */}
+        {/* Área Rolável */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 [overflow-scrolling:touch]">
-          <div className="space-y-3">
-            {sortedExpenses.map((expense) => (
-              <div
-                key={expense.id}
-                className="bg-gray-800 p-4 rounded-lg shadow-md hover:bg-gray-750 transition-colors duration-200"
-              >
-                {editId === expense.id ? (
-                  <div className="flex flex-col gap-3">
-                    <input
-                      type="text"
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                    <input
-                      type="number"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => updateExpense(expense.id, editValue, editDescription)}
-                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
-                      >
-                        Salvar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditId(null);
-                          setEditValue("");
-                          setEditDescription("");
-                        }}
-                        className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <p className="text-gray-200 font-medium break-words">
-                        {expense.description}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {expense.timestamp.toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-emerald-400 font-mono">
-                        R$ {expense.value.toFixed(2)}
-                      </span>
+          {showSummary ? (
+            <div className="bg-gray-800 p-4 rounded-lg mb-4 shadow-xl">
+              <h2 className="text-lg font-semibold mb-4">📊 Resumo do Mês</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span>Total Gastos:</span>
+                  <span className="font-mono text-emerald-400">
+                    R$ {totalExpenses.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Quantidade de Itens:</span>
+                  <span className="font-mono text-emerald-400">{expenses.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Média por Item:</span>
+                  <span className="font-mono text-emerald-400">
+                    R$ {(expenses.length > 0 ? (totalExpenses / expenses.length) : 0).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Maior Gasto:</span>
+                  <span className="font-mono text-emerald-400">
+                    R$ {(expenses.length > 0 ? Math.max(...expenses.map(e => e.value)) : 0).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Menor Gasto:</span>
+                  <span className="font-mono text-emerald-400">
+                    R$ {(expenses.length > 0 ? Math.min(...expenses.map(e => e.value)) : 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sortedExpenses.map((expense) => (
+                <div
+                  key={expense.id}
+                  className="bg-gray-800 p-4 rounded-lg shadow-md hover:bg-gray-750 transition-colors duration-200"
+                >
+                  {editId === expense.id ? (
+                    <div className="flex flex-col gap-3">
+                      <input
+                        type="text"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            setEditId(expense.id);
-                            setEditValue(expense.value.toString());
-                            setEditDescription(expense.description);
-                          }}
-                          className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg"
+                          onClick={() => updateExpense(expense.id, editValue, editDescription)}
+                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
                         >
-                          ✏️
+                          Salvar
                         </button>
                         <button
-                          onClick={() => removeExpense(expense.id)}
-                          className="p-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                          onClick={() => {
+                            setEditId(null);
+                            setEditValue("");
+                            setEditDescription("");
+                          }}
+                          className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
                         >
-                          🗑️
+                          Cancelar
                         </button>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  ) : (
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1">
+                        <p className="text-gray-200 font-medium break-words">
+                          {expense.description}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          {expense.timestamp.toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-emerald-400 font-mono">
+                          R$ {expense.value.toFixed(2)}
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditId(expense.id);
+                              setEditValue(expense.value.toString());
+                              setEditDescription(expense.description);
+                            }}
+                            className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => removeExpense(expense.id)}
+                            className="p-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

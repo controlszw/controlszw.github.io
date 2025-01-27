@@ -253,52 +253,56 @@ function ExpenseTracker() {
               </div>
 
               {/* Total e Filtro */}
-              <div className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
-                <h3 className="font-bold text-emerald-400">
-                  Total: R$ {totalExpenses.toFixed(2)}
-                </h3>
-                <select
-                  value={currentSort}
-                  onChange={(e) => setCurrentSort(e.target.value)}
-                  className="bg-gray-800 px-2 py-1 rounded-lg text-sm"
-                >
-                  <option value="value">Maior valor</option>
-                  <option value="date">Mais recente</option>
-                </select>
-              </div>
+              {!showSummary && (
+                <div className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                  <h3 className="font-bold text-emerald-400">
+                    Total: R$ {totalExpenses.toFixed(2)}
+                  </h3>
+                  <select
+                    value={currentSort}
+                    onChange={(e) => setCurrentSort(e.target.value)}
+                    className="bg-gray-800 px-2 py-1 rounded-lg text-sm"
+                  >
+                    <option value="value">Maior valor</option>
+                    <option value="date">Mais recente</option>
+                  </select>
+                </div>
+              )}
             </div>
 
-            {/* Formulário de Adição */}
-            <div className="space-y-3">
-              <input
-                type="number"
-                placeholder="Valor"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <input
-                type="text"
-                placeholder="Descrição"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <input
-                type="number"
-                placeholder="Parcelas"
-                value={installments}
-                min="1"
-                onChange={(e) => setInstallments(parseInt(e.target.value))}
-                className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <button
-                onClick={addExpense}
-                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200"
-              >
-                ➕ Adicionar Gasto
-              </button>
-            </div>
+            {/* Formulário de Adição (oculto no resumo) */}
+            {!showSummary && (
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  placeholder="Valor"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Descrição"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <input
+                  type="number"
+                  placeholder="Parcelas"
+                  value={installments}
+                  min="1"
+                  onChange={(e) => setInstallments(parseInt(e.target.value))}
+                  className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <button
+                  onClick={addExpense}
+                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200"
+                >
+                  ➕ Adicionar Gasto
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

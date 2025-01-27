@@ -75,8 +75,7 @@ function ExpenseTracker() {
 
       for (let i = 0; i < installments; i++) {
         const installmentMonth = (currentMonth + i) % 12;
-        const installmentYear =
-          currentYear + Math.floor((currentMonth + i) / 12);
+        const installmentYear = currentYear + Math.floor((currentMonth + i) / 12);
         const newExpense = {
           value: parsedValue / installments,
           description: `${description} - Parcela ${i + 1}/${installments}`,
@@ -115,18 +114,31 @@ function ExpenseTracker() {
   const updateExpense = async (id, newValue, newDescription) => {
     try {
       const docRef = doc(db, "users", user.uid, "expenses", id);
+<<<<<<< HEAD
       await updateDoc(docRef, {
         value: parseFloat(newValue),
         description: newDescription,
+=======
+      await updateDoc(docRef, { 
+        value: parseFloat(newValue),
+        description: newDescription 
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
       });
 
       setExpenses((prevExpenses) =>
         prevExpenses.map((expense) =>
           expense.id === id
+<<<<<<< HEAD
             ? {
                 ...expense,
                 value: parseFloat(newValue),
                 description: newDescription,
+=======
+            ? { 
+                ...expense, 
+                value: parseFloat(newValue),
+                description: newDescription 
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
               }
             : expense
         )
@@ -151,9 +163,7 @@ function ExpenseTracker() {
       );
       const querySnapshot = await getDocs(q);
 
-      const deletePromises = querySnapshot.docs.map((doc) =>
-        deleteDoc(doc.ref)
-      );
+      const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
 
       setExpenses((prevExpenses) =>
@@ -204,6 +214,7 @@ function ExpenseTracker() {
   });
 
   return (
+<<<<<<< HEAD
     <div className="h-dvh bg-gray-900 text-gray-100 flex flex-col overflow-hidden">
       <div className="max-w-4xl mx-auto w-full h-full flex flex-col min-h-0">
         {/* Header Fixo */}
@@ -296,12 +307,102 @@ function ExpenseTracker() {
                 onClick={addExpense}
                 className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200"
               >
+=======
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4 flex flex-col">
+      <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 flex-shrink-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-emerald-400 text-center">
+            💰 Controle de Gastos
+          </h1>
+          <button
+            onClick={handleLogout}
+            className="w-full sm:w-auto px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200 text-sm"
+          >
+            🚪 Sair
+          </button>
+        </div>
+
+        {/* Month Navigation and Controls */}
+        <div className="flex-shrink-0">
+          <div className="bg-gray-800 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl">
+            <div className="flex flex-col gap-2 sm:flex-row items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-center">
+                📅{" "}
+                {new Date(currentYear, currentMonth)
+                  .toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })
+                  .replace(/de /g, "")}
+              </h2>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={previousMonth}
+                  className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                >
+                  ← Anterior
+                </button>
+                <button
+                  onClick={nextMonth}
+                  className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200 text-sm"
+                >
+                  Próximo →
+                </button>
+              </div>
+            </div>
+
+            {/* Total e Filtro */}
+            <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4 flex justify-between items-center">
+              <h3 className="text-lg sm:text-xl font-bold text-emerald-400">
+                Total: R$ {totalExpenses.toFixed(2)}
+              </h3>
+              <select
+                value={currentSort}
+                onChange={(e) => setCurrentSort(e.target.value)}
+                className="bg-gray-800 text-gray-100 px-2 py-1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="value">Maior valor</option>
+                <option value="date">Mais recente</option>
+              </select>
+            </div>
+
+            {/* Add Expense Form */}
+            <div className="flex flex-col gap-2 mb-4 sm:mb-6">
+              <input
+                type="number"
+                placeholder="Valor"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
+              <input
+                type="text"
+                placeholder="Descrição"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
+              <input
+                type="number"
+                placeholder="Parcelas"
+                value={installments}
+                min="1"
+                onChange={(e) => setInstallments(parseInt(e.target.value))}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+              />
+              <button
+                onClick={addExpense}
+                className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors duration-200 text-base"
+              >
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                 ➕ Adicionar Gasto
               </button>
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Área Rolável de Gastos */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 [overflow-scrolling:touch]">
           <div className="space-y-3">
@@ -312,16 +413,33 @@ function ExpenseTracker() {
               >
                 {editId === expense.id ? (
                   <div className="flex flex-col gap-3">
+=======
+        {/* Scrollable Expenses List */}
+        <div className="flex-1 overflow-auto pb-4">
+          <div className="bg-gray-800 rounded-xl p-3 sm:p-4 shadow-xl space-y-3">
+            {sortedExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between bg-gray-800 p-4 rounded-lg hover:bg-gray-750 transition-colors duration-200"
+              >
+                {editId === expense.id ? (
+                  <div className="flex-1 flex flex-col gap-3">
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                     <input
                       type="text"
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+=======
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                     />
                     <input
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <div className="flex gap-2">
@@ -330,6 +448,33 @@ function ExpenseTracker() {
                           updateExpense(expense.id, editValue, editDescription)
                         }
                         className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+=======
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-base"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1">
+                    <span className="text-base text-gray-200 break-words block font-medium">
+                      {expense.description}
+                    </span>
+                    <span className="text-sm text-gray-400 block mt-1">
+                      {expense.timestamp.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between gap-3 mt-2 sm:mt-0">
+                  {editId === expense.id ? (
+                    <div className="flex flex-col gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => updateExpense(expense.id, editValue, editDescription)}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors duration-200 text-base"
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                       >
                         Salvar
                       </button>
@@ -339,11 +484,16 @@ function ExpenseTracker() {
                           setEditValue("");
                           setEditDescription("");
                         }}
+<<<<<<< HEAD
                         className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+=======
+                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors duration-200 text-base"
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                       >
                         Cancelar
                       </button>
                     </div>
+<<<<<<< HEAD
                   </div>
                 ) : (
                   <div className="flex justify-between items-start gap-4">
@@ -362,6 +512,11 @@ function ExpenseTracker() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-emerald-400 font-mono">
+=======
+                  ) : (
+                    <>
+                      <span className="text-base sm:text-lg font-mono text-emerald-400 min-w-[100px] text-right">
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                         R$ {expense.value.toFixed(2)}
                       </span>
                       <div className="flex gap-2">
@@ -371,20 +526,34 @@ function ExpenseTracker() {
                             setEditValue(expense.value.toString());
                             setEditDescription(expense.description);
                           }}
+<<<<<<< HEAD
                           className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg"
+=======
+                          className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors duration-200 text-base"
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                         >
-                          ✏️
+                          Editar
                         </button>
                         <button
                           onClick={() => removeExpense(expense.id)}
+<<<<<<< HEAD
                           className="p-2 bg-red-600 hover:bg-red-700 rounded-lg"
+=======
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200 text-base"
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
                         >
-                          🗑️
+                          Excluir
                         </button>
                       </div>
+<<<<<<< HEAD
                     </div>
                   </div>
                 )}
+=======
+                    </>
+                  )}
+                </div>
+>>>>>>> a5d8d6ee92134d6105d48f504ccf089773447bc4
               </div>
             ))}
           </div>

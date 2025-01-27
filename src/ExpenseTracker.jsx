@@ -23,6 +23,7 @@ function ExpenseTracker() {
   const [editValue, setEditValue] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentSort, setCurrentSort] = useState("value"); // 'value' ou 'date'
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -49,10 +50,14 @@ function ExpenseTracker() {
         where("year", "==", year)
       );
       const querySnapshot = await getDocs(q);
-      const fetchedExpenses = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const fetchedExpenses = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp.toDate(), // Converter Timestamp para Date
+        };
+      });
       setExpenses(fetchedExpenses);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -181,6 +186,15 @@ function ExpenseTracker() {
     0
   );
 
+  // Ordenar despesas
+  const sortedExpenses = [...expenses].sort((a, b) => {
+    if (currentSort === "value") {
+      return b.value - a.value;
+    } else {
+      return b.timestamp - a.timestamp;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
@@ -225,11 +239,19 @@ function ExpenseTracker() {
             </div>
           </div>
 
-          {/* Total */}
-          <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4">
-            <h3 className="text-lg sm:text-xl font-bold text-center text-emerald-400">
+          {/* Total e Filtro */}
+          <div className="bg-gray-700 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4 flex justify-between items-center">
+            <h3 className="text-lg sm:text-xl font-bold text-emerald-400">
               Total: R$ {totalExpenses.toFixed(2)}
             </h3>
+            <select
+              value={currentSort}
+              onChange={(e) => setCurrentSort(e.target.value)}
+              className="bg-gray-800 text-gray-100 px-2 py-1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="value">Maior valor</option>
+              <option value="date">Mais recente</option>
+            </select>
           </div>
 
           {/* Add Button */}
@@ -267,16 +289,26 @@ function ExpenseTracker() {
           </div>
 
           {/* Expenses List */}
-          <div className="max-h-[60vh] overflow-y-auto"> {/* Área scrollável */}
+          <div className="max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
-              {expenses.map((expense) => (
+              {sortedExpenses.map((expense) => (
                 <div
                   key={expense.id}
                   className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
                 >
-                  <span className="text-sm text-gray-300 break-words max-w-[65vw]">
-                    {expense.description}
-                  </span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-300 break-words block">
+                      {expense.description}
+                    </span>
+                    <span className="text-xs text-gray-500 block mt-1">
+                      {expense.timestamp.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
 
                   <div className="flex items-center justify-between gap-2">
                     {editId === expense.id ? (

@@ -181,9 +181,6 @@ function ExpenseTracker() {
     0
   );
 
-  // O restante do JSX permanece igual...
-  // (Manter a mesma interface do código anterior)
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
@@ -270,60 +267,62 @@ function ExpenseTracker() {
           </div>
 
           {/* Expenses List */}
-          <div className="space-y-2">
-            {expenses.map((expense) => (
-              <div
-                key={expense.id}
-                className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
-              >
-                <span className="text-sm text-gray-300 break-words max-w-[65vw]">
-                  {expense.description}
-                </span>
+          <div className="max-h-[60vh] overflow-y-auto"> {/* Área scrollável */}
+            <div className="space-y-2">
+              {expenses.map((expense) => (
+                <div
+                  key={expense.id}
+                  className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between bg-gray-800 p-3 rounded-lg hover:bg-gray-750 transition-colors duration-200"
+                >
+                  <span className="text-sm text-gray-300 break-words max-w-[65vw]">
+                    {expense.description}
+                  </span>
 
-                <div className="flex items-center justify-between gap-2">
-                  {editId === expense.id ? (
-                    <input
-                      type="number"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    />
-                  ) : (
-                    <span className="text-sm sm:text-base font-mono text-emerald-400">
-                      R$ {expense.value.toFixed(2)}
-                    </span>
-                  )}
-                  <div className="flex gap-1">
+                  <div className="flex items-center justify-between gap-2">
                     {editId === expense.id ? (
-                      <button
-                        onClick={() => updateExpense(expense.id, editValue)}
-                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
-                      >
-                        💾
-                      </button>
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="w-20 p-1 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                      />
                     ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            setEditId(expense.id);
-                            setEditValue(expense.value.toString());
-                          }}
-                          className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => removeExpense(expense.id)}
-                          className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
-                        >
-                          🗑️
-                        </button>
-                      </>
+                      <span className="text-sm sm:text-base font-mono text-emerald-400">
+                        R$ {expense.value.toFixed(2)}
+                      </span>
                     )}
+                    <div className="flex gap-1">
+                      {editId === expense.id ? (
+                        <button
+                          onClick={() => updateExpense(expense.id, editValue)}
+                          className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded transition-colors duration-200 text-sm"
+                        >
+                          💾
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditId(expense.id);
+                              setEditValue(expense.value.toString());
+                            }}
+                            className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors duration-200 text-sm"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => removeExpense(expense.id)}
+                            className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors duration-200 text-sm"
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

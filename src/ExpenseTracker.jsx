@@ -77,7 +77,8 @@ function ExpenseTracker() {
 
       for (let i = 0; i < installments; i++) {
         const installmentMonth = (currentMonth + i) % 12;
-        const installmentYear = currentYear + Math.floor((currentMonth + i) / 12);
+        const installmentYear =
+          currentYear + Math.floor((currentMonth + i) / 12);
         const newExpense = {
           value: parsedValue / installments,
           description: `${description} - Parcela ${i + 1}/${installments}`,
@@ -117,18 +118,18 @@ function ExpenseTracker() {
   const updateExpense = async (id, newValue, newDescription) => {
     try {
       const docRef = doc(db, "users", user.uid, "expenses", id);
-      await updateDoc(docRef, { 
+      await updateDoc(docRef, {
         value: parseFloat(newValue),
-        description: newDescription 
+        description: newDescription,
       });
 
       setExpenses((prevExpenses) =>
         prevExpenses.map((expense) =>
           expense.id === id
-            ? { 
-                ...expense, 
+            ? {
+                ...expense,
                 value: parseFloat(newValue),
-                description: newDescription 
+                description: newDescription,
               }
             : expense
         )
@@ -142,6 +143,12 @@ function ExpenseTracker() {
   };
 
   const removeExpense = async (id) => {
+    // Adicione esta verificação no início da função
+    const confirmation = window.confirm(
+      "Tem certeza que deseja excluir esta despesa?"
+    );
+    if (!confirmation) return;
+
     try {
       const expenseToDelete = expenses.find((expense) => expense.id === id);
       if (!expenseToDelete) return;
@@ -153,7 +160,9 @@ function ExpenseTracker() {
       );
       const querySnapshot = await getDocs(q);
 
-      const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
+      const deletePromises = querySnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref)
+      );
       await Promise.all(deletePromises);
 
       setExpenses((prevExpenses) =>
@@ -209,13 +218,15 @@ function ExpenseTracker() {
         {/* Header Fixo */}
         <div className="pt-4 px-4 flex-shrink-0">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold text-emerald-400">💰 Controle de Gastos</h1>
+            <h1 className="text-xl font-bold text-emerald-400">
+              💰 Controle de Gastos
+            </h1>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowSummary(!showSummary)}
                 className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm"
               >
-                {showSummary ? '📋 Lista' : '📊 Resumo'}
+                {showSummary ? "📋 Lista" : "📊 Resumo"}
               </button>
               <button
                 onClick={handleLogout}
@@ -234,8 +245,12 @@ function ExpenseTracker() {
             <div className="flex flex-col gap-3 mb-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">
-                  📅 {new Date(currentYear, currentMonth)
-                    .toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+                  📅{" "}
+                  {new Date(currentYear, currentMonth)
+                    .toLocaleDateString("pt-BR", {
+                      month: "long",
+                      year: "numeric",
+                    })
                     .replace(/de /g, "")}
                 </h2>
                 <div className="flex gap-2">
@@ -296,7 +311,9 @@ function ExpenseTracker() {
                       placeholder="Parcelas"
                       value={installments}
                       min="1"
-                      onChange={(e) => setInstallments(parseInt(e.target.value))}
+                      onChange={(e) =>
+                        setInstallments(parseInt(e.target.value))
+                      }
                       className="w-full p-2 bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <div className="flex gap-2">
@@ -341,24 +358,38 @@ function ExpenseTracker() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Quantidade de Itens:</span>
-                  <span className="font-mono text-emerald-400">{expenses.length}</span>
+                  <span className="font-mono text-emerald-400">
+                    {expenses.length}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Média por Item:</span>
                   <span className="font-mono text-emerald-400">
-                    R$ {(expenses.length > 0 ? (totalExpenses / expenses.length) : 0).toFixed(2)}
+                    R${" "}
+                    {(expenses.length > 0
+                      ? totalExpenses / expenses.length
+                      : 0
+                    ).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Maior Gasto:</span>
                   <span className="font-mono text-emerald-400">
-                    R$ {(expenses.length > 0 ? Math.max(...expenses.map(e => e.value)) : 0).toFixed(2)}
+                    R${" "}
+                    {(expenses.length > 0
+                      ? Math.max(...expenses.map((e) => e.value))
+                      : 0
+                    ).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Menor Gasto:</span>
                   <span className="font-mono text-emerald-400">
-                    R$ {(expenses.length > 0 ? Math.min(...expenses.map(e => e.value)) : 0).toFixed(2)}
+                    R${" "}
+                    {(expenses.length > 0
+                      ? Math.min(...expenses.map((e) => e.value))
+                      : 0
+                    ).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -386,7 +417,13 @@ function ExpenseTracker() {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => updateExpense(expense.id, editValue, editDescription)}
+                          onClick={() =>
+                            updateExpense(
+                              expense.id,
+                              editValue,
+                              editDescription
+                            )
+                          }
                           className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg"
                         >
                           Salvar
